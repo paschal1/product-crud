@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js and npm for Vite (frontend asset compilation)
+# Install Node.js and npm for Vite
 RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g npm
@@ -29,16 +29,15 @@ WORKDIR /var/www
 # Copy project files
 COPY . .
 
-# Update composer.json to include laravel/breeze in production
-RUN sed -i 's/"laravel\/breeze": "^2.3"/"laravel\/breeze": "^2.3"/' composer.json \
-    && composer install --optimize-autoloader
+# Install PHP dependencies (from lock file for reproducibility)
+RUN composer install --no-dev --optimize-autoloader
 
-# Build frontend assets (for Vite/Breeze)
+# Build frontend assets
 RUN npm install && npm run build
 
 # Set file permissions for Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 # Redirect Laravel logs to stdout for Render
 RUN ln -sf /dev/stdout /var/www/storage/logs/laravel.log
@@ -51,8 +50,8 @@ RUN php artisan config:clear \
     && php artisan route:cache \
     && php artisan view:cache
 
-# Run database migrations (comment out if manual execution is preferred)
-RUN php artisan migrate --force
+# (Optional) Run migrations automatically – better to do manually via CI/CD
+# RUN php artisan migrate --force
 
 # Copy Nginx configuration
 COPY ./nginx.conf /etc/nginx/sites-available/default
@@ -60,7 +59,7 @@ COPY ./nginx.conf /etc/nginx/sites-available/default
 # Expose port 10000 for Render
 EXPOSE 10000
 
-# Health check to verify app is running
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s \
     CMD curl -f http://localhost:10000/ || exit 1
 
