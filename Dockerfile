@@ -1,28 +1,54 @@
-# Use PHP 8.2 with FPM (Fast PHP)
+# Use PHP 8.2 with FPM as the base image
 FROM php:8.2-fpm
 
-# Install some tools Laravel needs
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+    git \
+    curl \
+    zip \
+    unzip \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libpq-dev \
+    nginx \
+    && docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Composer (for Laravel packages)
+# Install Node.js and npm for Vite (frontend asset compilation)
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm
+
+# Install Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# Where our code will live inside the box
+# Set working directory
 WORKDIR /var/www
 
-# Copy all project files into the box
+# Copy project files
 COPY . .
 
-# Install Laravel packages
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Cache Laravel settings
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
+# Build frontend assets (for Vite/Breeze)
+RUN npm install && npm run build
 
-# Open port 10000 (Render needs this)
+# Set file permissions for Laravel
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+# Cache Laravel configurations
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
+
+# Copy Nginx configuration
+COPY ./nginx.conf /etc/nginx/sites-available/default
+
+# Expose port 10000 for Render
 EXPOSE 10000
 
-# Start Laravel
-CMD php artisan serve --host=0.0.0.0 --port=10000
+# Start Nginx and PHP-FPM
+CMD service nginx start && php-fpm
