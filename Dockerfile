@@ -39,16 +39,26 @@ RUN npm install && npm run build
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
+# Redirect Laravel logs to stdout for Render
+RUN ln -sf /dev/stdout /var/www/storage/logs/laravel.log
+
 # Cache Laravel configurations
 RUN php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
+
+# Run database migrations (optional; comment out if manual execution is preferred)
+RUN php artisan migrate --force
 
 # Copy Nginx configuration
 COPY ./nginx.conf /etc/nginx/sites-available/default
 
 # Expose port 10000 for Render
 EXPOSE 10000
+
+# Health check to verify app is running
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD curl -f http://localhost:10000/ || exit 1
 
 # Start Nginx and PHP-FPM
 CMD service nginx start && php-fpm
