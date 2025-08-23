@@ -29,8 +29,9 @@ WORKDIR /var/www
 # Copy project files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Update composer.json to include laravel/breeze in production
+RUN sed -i 's/"laravel\/breeze": "^2.3"/"laravel\/breeze": "^2.3"/' composer.json \
+    && composer install --optimize-autoloader
 
 # Build frontend assets (for Vite/Breeze)
 RUN npm install && npm run build
@@ -42,12 +43,15 @@ RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 # Redirect Laravel logs to stdout for Render
 RUN ln -sf /dev/stdout /var/www/storage/logs/laravel.log
 
-# Cache Laravel configurations
-RUN php artisan config:cache \
+# Clear and cache Laravel configurations
+RUN php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear \
+    && php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
 
-# Run database migrations (optional; comment out if manual execution is preferred)
+# Run database migrations (comment out if manual execution is preferred)
 RUN php artisan migrate --force
 
 # Copy Nginx configuration
