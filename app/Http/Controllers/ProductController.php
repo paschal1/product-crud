@@ -19,8 +19,8 @@ class ProductController extends Controller
     }
 
     /**
-     * postgresql://postgres:[YOUR-PASSWORD]@db.ezejraknspitwljhvjvh.supabase.co:5432/postgres
-     * Show the form for creating a new resource.
+     * postgresql://postgres:[YOUR-PASSWORD]@db.ezejraknspitwljhvjvh.supabase.co:5432/postgres  postgresql://paschal:AXpXW4CbgcouzIdETFA2KrlSc36R0sQj@dpg-d2l0v6re5dus738cbung-a/product_crud_ulzx
+     * Show the form for creating a new resource.  https://app.planetscale.com/  3306  product_crud paschal1  Paschal@081  postgresql://paschal:AXpXW4CbgcouzIdETFA2KrlSc36R0sQj@dpg-d2l0v6re5dus738cbung-a.oregon-postgres.render.com/product_crud_ulzx
      */
     public function create()
     {
