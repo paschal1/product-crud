@@ -19,6 +19,7 @@ class ProductController extends Controller
     }
 
     /**
+     * postgresql://postgres:[YOUR-PASSWORD]@db.ezejraknspitwljhvjvh.supabase.co:5432/postgres
      * Show the form for creating a new resource.
      */
     public function create()
