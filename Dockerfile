@@ -25,6 +25,9 @@ RUN npm run build -- --mode production
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Create storage symlink so images are accessible
+RUN php artisan storage:link
+
 # Set Apache Document Root to /public
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
