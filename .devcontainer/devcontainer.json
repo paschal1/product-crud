@@ -2,22 +2,11 @@
   "name": "Laravel Workspace",
   "image": "mcr.microsoft.com/devcontainers/php:8.2",
   "features": {
-    "ghcr.io/devcontainers/features/composer:2": {
+    "ghcr.io/devcontainers/features/composer:1": {
       "version": "latest"
     },
     "ghcr.io/devcontainers/features/node:1": {
       "version": "18"
-    }
-  },
-  "postCreateCommand": "composer install && npm install && npm run build",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ikappas.composer",
-        "bmewburn.vscode-intelephense-client",
-        "amiralizadeh9480.laravel-extra-intellisense",
-        "esbenp.prettier-vscode"
-      ]
     }
   },
   "forwardPorts": [8000],
