@@ -2,9 +2,6 @@
   "name": "Laravel Workspace",
   "image": "mcr.microsoft.com/devcontainers/php:8.2",
   "features": {
-    "ghcr.io/devcontainers/features/php:1": {
-      "version": "8.2"
-    },
     "ghcr.io/devcontainers/features/composer:2": {
       "version": "latest"
     },
@@ -12,7 +9,7 @@
       "version": "18"
     }
   },
-  "postCreateCommand": "/bin/bash -c 'composer install && npm install && npm run build'",
+  "postCreateCommand": "composer install && npm install && npm run build",
   "customizations": {
     "vscode": {
       "extensions": [
