@@ -18,8 +18,9 @@ COPY . /var/www/html
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Install Node.js dependencies
+# Install Node.js dependencies and build assets
 RUN npm install
+RUN npm run build
 
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
@@ -29,8 +30,8 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Expose Apache port and Vite dev server port
-EXPOSE 80 5173
+# Expose Apache port
+EXPOSE 80
 
-# Default command: start Apache and optionally allow dev mode
-CMD ["bash", "-c", "apache2-foreground"]
+# Start Apache
+CMD ["apache2-foreground"]
