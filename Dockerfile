@@ -20,7 +20,7 @@ RUN composer install --no-dev --optimize-autoloader
 
 # Install Node.js dependencies and build assets
 RUN npm install
-RUN npm run build
+RUN npm run build -- --mode production
 
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
